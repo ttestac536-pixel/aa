@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIC Integration Chat Agent</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-content">
+                <h1>🚀 OIC Integration Agent</h1>
+                <p>Create and Deploy Integrations via Chat</p>
+            </div>
+            <button class="btn-new-session" onclick="startNewSession()">New Chat</button>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will appear here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-area">
+            <!-- File Upload (hidden by default) -->
+            <div id="fileUploadArea" class="file-upload-area" style="display: none;">
+                <div class="upload-box" id="uploadBox">
+                    <p>📎 Attach files or drop CSV here</p>
+                    <input type="file" id="fileInput" accept=".csv,.xml,.json" hidden>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form onsubmit="handleSendMessage(event)" class="input-form">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="Describe your integration or ask for help..." 
+                        rows="3"
+                        autocomplete="off"
+                    ></textarea>
+                    <button type="submit" class="btn-send">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/chat.js"></script>
+</body>
+</html>

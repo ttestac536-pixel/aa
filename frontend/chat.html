@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OU Scribe - Your Design Document Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'system': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Display', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'neural': {
+                            50: '#fafbfc',
+                            100: '#f4f6f8',
+                            200: '#e8ecf0',
+                            300: '#dde2e8',
+                            400: '#9ca6b2',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            850: '#1a202c',
+                            900: '#111827',
+                            950: '#0a0e14'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'hcl-roobert-regular';
+            src: url('/static/fonts/HCLTechRoobert-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+          }
+          @font-face {
+            font-family: 'hcl-roobert-semibold';
+            src: url('/static/fonts/HCLTechRoobert-SemiBold.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+          }
+          @font-face {
+            font-family: 'hcl-roobert-bold';
+            src: url('/static/fonts/HCLTechRoobert-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+          }
+          @font-face {
+            font-family: 'hcl-roobert-light';
+            src: url('/static/fonts/HCLTechRoobert-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-style: normal;
+          }
+          h1, h2, h3, h4, h5, h6 {
+            font-family: 'hcl-roobert-light';
+            font-weight: 500;
+        }
+
+        p, span, ul, li, ol, div {
+            font-family: 'hcl-roobert-regular';
+        }
+
+        /* Apple-style neumorphism with proper light/dark mode support */
+        .neuro-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Dark mode styles */
+        .dark .neuro-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Light mode styles */
+        .neuro-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .neuro-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        
+        .dark .neuro-card:hover {
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        .neuro-button {
+            backdrop-filter: blur(20px) saturate(180%);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dark .neuro-button {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .neuro-button {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .neuro-button:hover {
+            transform: scale(1.02);
+        }
+        
+        .neuro-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Input styles for both modes */
+        .apple-input {
+            backdrop-filter: blur(20px) saturate(180%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dark .apple-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgb(255, 255, 255);
+        }
+        
+        .apple-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgb(0, 0, 0);
+        }
+        
+        .dark .apple-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .apple-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .dark .apple-input::placeholder {
+            color: rgb(156, 163, 175);
+        }
+        
+        .apple-input::placeholder {
+            color: rgb(107, 114, 128);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .typing-dots {
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .message-stream {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-bg {
+            background: 
+                radial-gradient(ellipse at top, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        }
+        
+        .apple-scroll {
+            scrollbar-width: thin;
+        }
+        
+        .dark .apple-scroll {
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        
+        .apple-scroll {
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
+        
+        .apple-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .apple-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .dark .apple-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .apple-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+        .dark .apple-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .apple-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Toolbar styles */
+        .dark .toolbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toolbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 48;
+        }
+        
+        /* Focus mode active state */
+        .focus-mode {
+            transition: all 0.2s ease;
+        }
+        
+        .focus-mode.active {
+            background: rgba(59, 130, 246, 0.15) !important;
+            color: rgb(59, 130, 246) !important;
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        }
+        
+        /* Navigation active state */
+        .nav-tab {
+            transition: all 0.2s ease;
+        }
+        
+        .active-tab {
+            background: rgba(59, 130, 246, 0.15) !important;
+            color: rgb(59, 130, 246) !important;
+        }
+        
+        /* Tab content management */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Chat layout fix */
+        .chat-container {
+            height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .chat-input-area {
+            flex-shrink: 0;
+            border-top: 1px solid;
+        }
+        
+        .dark .chat-input-area {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-input-area {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .modalscreen {
+            word-break: break-all;
+        }
+
+        .custom-wrap {
+            word-break: break-word;
+        }
+        .message-stream  h1,.message-stream  h2,.message-stream  h3,.message-stream  h4, .message-stream  h5, .message-stream  h6 {
+            font-size: revert !important;
+            font-weight: revert !important;
+            margin: revert !important;
+        }
+        pre code {
+            text-wrap-mode: wrap;
+        }
+    </style>
+</head>
+<body class="font-system bg-white dark:bg-neural-950 text-neural-900 dark:text-neural-100 antialiased transition-all duration-500">
+    <!-- Header Toolbar -->
+     <!-- Sidebar -->
+<!-- Sidebar overlay for background blur -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+
+<!-- Sidebar drawer, hidden by default -->
+<aside id="sidebarDrawer"
+  class="fixed top-0 left-0 h-screen w-[340px] p-4 bg-white border-r border-gray-100 shadow-xl z-50 
+  transition-transform duration-300 -translate-x-full overflow-y-auto"
+  style="max-width: 350px;">
+  <!-- User block and Hamburger/Close -->
+  <div class="relative">
+    <button id="sidebarCloseBtn" class="absolute top-0 right-0 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg p-2">
+      <!-- Close icon (X) -->
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 6L18 18M6 18L18 6"/>
+      </svg>
+    </button>
+    <div class="flex items-center gap-3 mb-4 mt-2">
+      <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white text-2xl font-bold" id="username"></span>
+      <div>
+        <div class="text-base font-semibold leading-tight text-neutral-800" id="userid">Guest</div>
+        
+      </div>
+    </div>
+  </div>
+  <!-- Session card -->
+  <div class="rounded-xl bg-blue-50 border border-blue-100 shadow px-2 py-4 mb-4">
+    <div class="flex justify-between items-center mb-2">
+      <span class="font-semibold text-blue-900">Current Session</span>
+      
+    </div>
+    <div class="text-xs pb-1 text-gray-700 flex items-center">
+      <span class="pr-1 font-medium">Session #:</span>
+      <span class="font-mono" id="sessionid">sess_2025_oct_001</span>
+    </div>
+    
+  </div>
+  <!-- Chat history -->
+  <div class="mb-2">
+    <div class="text-xs text-gray-500 font-semibold mb-2">Chat History</div>
+    <div class="flex flex-col gap-3">
+      <!-- Chat history examples -->
+      <div class="rounded-xl bg-white border shadow p-3 flex items-center">
+        <div class="flex-1">
+          <div class="font-medium text-[15px] text-blue-900">Oracle Integration Cloud Setup</div>
+          <div class="truncate text-xs text-gray-400">How do I configure OIC for VBCS integr...</div>
+          <div class="text-xs text-gray-500 mt-1">2 hours ago</div>
+        </div>
+        <div class="ml-2 bg-blue-100 text-blue-600 rounded-full h-7 w-7 flex items-center justify-center text-xs font-bold">15</div>
+      </div>
+      <!-- Repeat the block above for each chat history item -->
+    </div>
+  </div>
+  <div class="mb-2">
+    <button onclick="startNewChat()" class="neuro-button w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200">
+                    Start New Chat
+    </button>
+  </div>
+</aside>
+
+<!-- Hamburger open button, position as you want, e.g. in your header -->
+
+
+
+<!-- Main App Content (your original structure, unchanged, e.g. header and main) -->
+
+  <!-- Insert your original header, toolbar, and main chat UI here as before -->
+  <header class="toolbar sticky top-0 z-50">
+    <!-- ... header, logo, theme toggle, etc ... -->
+  </header>
+  <main class="flex-1">
+    <!-- ... all your chat tabs, tab-content, and chat UI ... -->
+  </main>
+
+    <header class="toolbar sticky top-0 z-48">
+        <button id="sidebarOpenBtn"
+  class="fixed top-4 left-4 z-54 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg p-2">
+  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M4 6h16M4 12h16M4 18h16"/>
+  </svg>
+</button>
+        <div class="md:ml-8 2xl:mx-auto max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative group">
+                        <img id="hcl-logo" class="sm:w-24 md:w-24 2xl:w-36" src="/hcl-logo-blue.png" alt="Logo">
+                        
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-xl md:text-sm font-semibold text-neural-900 dark:text-white gradient-text font-medium">OU Scribe </h1>
+                        <p class="text-xs text-neural-500 dark:text-neural-400">Your Design Document Agent</p>
+                    </div>
+                </div>
+
+                <!-- Center Navigation -->
+                <nav class="hidden md:flex items-center space-x-1">
+                   
+
+                    <!-- <button onclick="setActiveTab('threads')" class="nav-tab px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 font-medium transition-all duration-200">
+                        Threads
+                    </button>
+                    <button onclick="setActiveTab('library')" class="nav-tab px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 font-medium transition-all duration-200">
+                        Library
+                    </button>
+                    <button onclick="setActiveTab('discover')" class="nav-tab px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 font-medium transition-all duration-200">
+                        Discover
+                    </button> -->
+                </nav>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-[150px]">
+  <select id="instanceEnvDropdown" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-neutral-800 dark:text-white"></select>
+</div>
+                    <div id="headerDropdownContainer" class="relative inline-block text-left">
+  
+
+
+                    </div>
+                    <!-- Admin Link -->
+                    <!-- <button onclick="setActiveTab('chat')" class="active-tab px-4 py-2 rounded-lg font-medium transition-all duration-200">
+                        Chat
+                    </button> -->
+                    <a href="#" id="adminLink" class="hidden lg:flex items-center space-x-2 px-3 py-2 neuro-button bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Application Setup</span>
+                    </a>
+                    
+                    <!-- <button onclick="toggleProMode()" id="proModeBtn" class="hidden md:flex items-center space-x-2 px-3 py-2 neuro-button bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span>Pro</span>
+                    </button> -->
+                    
+                    <button onclick="toggleTheme()" class="neuro-button p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1">
+        <!-- Chat Tab Content -->
+        <div id="chat-tab" class="tab-content active">
+            <div class="chat-container">
+                <!-- Chat Messages Area -->
+                <div class="chat-messages apple-scroll" id="chatMessages">
+                    <!-- Hero Welcome Area -->
+                    <section class="hero-bg flex items-center justify-center px-6 py-4" id="heroSection">
+                        <div class="text-center max-w-6xl mx-auto">
+                            <div class="mb-12">
+                                <!-- Status Indicator -->
+                                <div class="inline-flex items-center px-6 py-3 neuro-card rounded-full text-sm text-neutral-600 dark:text-neutral-300 mb-8 hover:scale-105 transition-transform duration-200">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                    <span id="user">Welcome, User!</span>
+                                </div>
+
+                                <!-- Main Heading -->
+                                <div style="width: max-content;position:relative;margin:0 auto;">
+                                <h1 class="2xl:text-6xl xl:text-5xl md:text-4xl font-light text-neutral-900 dark:text-white mb-3 leading-tight">
+                                    Meet
+                                    <span class="gradient-text font-medium">OU Scribe</span>
+                                    
+                                </h1>
+                                <span class="text-lg mb-8 text-right gradient-text" style="display:flex;width:100%;justify-content:flex-end">Your Design Document Agent</span>
+                                </div>
+                                <p class="text-xl text-neutral-600 dark:text-neutral-300 mt-4 mb-12 max-w-3xl mx-auto leading-relaxed">
+                                    A smart assistant designed to accelerate and elevate enterprise documentation. OU Scribe simplifies the creation of Business, Functional, and Technical Design Documents by understanding user input, guiding content completion via chat, and producing polished, standards-compliant deliverables.
+                                </p>
+                            </div>
+
+                            <!-- Quick Actions Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                                <div class="neuro-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300">
+                                    <div class="text-blue-500 text-3xl mb-4 group-hover:animate-bounce">✨</div>
+                                    <h3 class="font-semibold text-neutral-900 dark:text-white mb-2">Intelligent Document Type Detection</h3>
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">Quickly identifies whether you're drafting a BRD, FDD, or TDD—setting the right context from the very first prompt.</p>
+                                </div>
+                                
+                                <div class="neuro-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300">
+                                    <div class="text-green-500 text-3xl mb-4 group-hover:animate-bounce">🧱</div>
+                                    <h3 class="font-semibold text-neutral-900 dark:text-white mb-2">Auto-Structured Template Matching</h3>
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">Automatically aligns your input with enterprise-approved templates, ensuring consistency, completeness, and compliance.</p>
+                                </div>
+                                
+                                <div class="neuro-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300">
+                                    <div class="text-purple-500 text-3xl mb-4 group-hover:animate-bounce">🤖</div>
+                                    <h3 class="font-semibold text-neutral-900 dark:text-white mb-2">Conversational Content Builder</h3>
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">Facilitate smooth transitions across OIC environments with full context preservation, ensuring uninterrupted workflows and consistent operational continuity</p>
+                                </div>
+                                
+                                <div class="neuro-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300">
+                                    <div class="text-orange-500 text-3xl mb-4 group-hover:animate-bounce">📄</div>
+                                    <h3 class="font-semibold text-neutral-900 dark:text-white mb-2">One-Click Document Generation</h3>
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">Ensure consistent and up-to-date OIC synchronization across environments for reliable and efficient operations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Messages will be added here dynamically -->
+                </div>
+
+                <!-- Chat Input Section - Sticky to bottom -->
+                <div class="chat-input-area toolbar p-6">
+                    <div class="max-w-4xl mx-auto">
+                        <!-- Focus Mode Selector -->
+                        
+
+                        <!-- Main Input Area -->
+                        <div class="neuro-card rounded-2xl p-4">
+                            <div class="flex items-center space-x-4">
+                                <!-- File Upload -->
+                                <button onclick="triggerFileUpload()" class="neuro-button p-3 rounded-xl text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-all duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Text Input -->
+                                <div class="flex-1 relative">
+                                    <textarea 
+                                        id="messageInput" 
+                                        rows="1" 
+                                        placeholder="Ask me anything..." 
+                                        class="apple-input w-full resize-none rounded-xl px-4 py-3 focus:outline-none border-0"
+                                        onkeypress="handleKeyPress(event)"
+                                        oninput="adjustTextareaHeight(this)"
+                                    ></textarea>
+                                    
+                                    <!-- Pro Search Indicator -->
+                                    <div id="proModeIndicator" class="absolute top-2 left-4 text-xs text-blue-600 dark:text-blue-400 font-medium hidden">
+                                        <span class="inline-flex items-center">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                                            Pro Search
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Send Button -->
+                                <button onclick="sendMessage()" id="sendBtn" class="neuro-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl p-3 transition-all duration-200 hover:scale-105">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- File Upload Preview -->
+                            <div id="filePreview" class="hidden mt-4 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-neutral-900 dark:text-white" id="fileName">document.pdf</p>
+                                            <p class="text-xs text-neutral-500 dark:text-neutral-400" id="fileSize">2.3 MB</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="removeFile()" class="text-neutral-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden File Input -->
+                    <input type="file" id="fileInput" multiple class="hidden" accept=".doc,.docx,.txt">
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Tab Contents -->
+        <div id="threads-tab" class="tab-content hidden p-6">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-6">Recent Conversations</h2>
+                <div class="space-y-4">
+                    <div class="neuro-card p-6 rounded-2xl hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+                        <h3 class="font-semibold text-neutral-900 dark:text-white mb-2">AI Ethics Discussion</h3>
+                        <p class="text-neutral-600 dark:text-neutral-400 text-sm mb-3">Exploring the implications of artificial intelligence in modern society...</p>
+                        <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                            <span>12 messages</span>
+                            <span>2 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="library-tab" class="tab-content hidden p-6">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-6">Your Library</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Saved conversations and documents will appear here.</p>
+            </div>
+        </div>
+
+        <div id="discover-tab" class="tab-content hidden p-6">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-6">Discover</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Explore trending topics and popular queries.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center">Copyright © 2025, HCL Technologies, Inc. All Right Reserved</footer>
+    <!-- Image Preview Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+  <div class="relative max-w-6xl w-full px-4">
+    <button id="closeModalBtn" class="absolute top-3 right-5 text-white text-2xl font-bold hover:text-red-400">×</button>
+    <img id="modalImage" src="" alt="Full Preview" class="rounded-2xl mx-auto shadow-2xl max-h-[70vh]" />
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="common.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

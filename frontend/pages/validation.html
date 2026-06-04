@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Validation - OIC</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✅ Integration Validation Portal</h1>
+            <p>Review, validate, and activate your integration</p>
+        </header>
+
+        <div id="message" class="message" style="display: none;"></div>
+
+        <div id="loading" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading integration details...</p>
+        </div>
+
+        <div id="validationContainer"></div>
+
+        <!-- Modals -->
+        <div id="mappingsModal" class="modal">
+            <div id="mappingsContent"></div>
+        </div>
+
+        <div id="transformationsModal" class="modal">
+            <div id="transformationsContent"></div>
+        </div>
+
+        <div id="sampleDataModal" class="modal">
+            <div id="sampleDataContent"></div>
+        </div>
+    </div>
+
+    <style>
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .validation-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin: 25px 0;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+
+        .validation-item.validated {
+            background: #d4edda;
+        }
+
+        .validation-item.pending {
+            background: #fff3cd;
+        }
+
+        .checkbox {
+            font-size: 1.5em;
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .btn-small {
+            margin-left: auto;
+            padding: 6px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-small:hover {
+            background: #764ba2;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .mapping-table, .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .mapping-table th, .mapping-table td,
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .mapping-table th, .data-table th {
+            background-color: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .mapping-table tr:nth-child(even),
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+
+    <script src="../js/validation.js"></script>
+</body>
+</html>
